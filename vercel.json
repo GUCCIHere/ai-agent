@@ -3,29 +3,17 @@
   "builds": [
     {
       "src": "backend/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "backend/**"
-        ]
-      }
-    },
-    {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/index.js"
+      "dest": "backend/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
+      "dest": "frontend/dist/$1"
     }
-  ],
-  "env": {
-    "DEEPSEEK_API_KEY": "@deepseek_api_key"
-  }
+  ]
 }
