@@ -12,8 +12,9 @@ export default defineConfig({
       }
     }
   },
+  base: '/',  // 确保是 '/'
   build: {
     outDir: 'dist',
-    sourcemap: true,
-  }
+    assetsDir: 'assets', sourcemap: true,
+  },
 });
