@@ -9,8 +9,12 @@ interface UseAgentCapabilitiesReturn {
 }
 
 export function useAgentCapabilities(
-  apiBaseUrl: string = 'http://localhost:3000'
+  apiBaseUrl?: string
 ): UseAgentCapabilitiesReturn {
+  // Vercel生产环境使用相对路径，本地开发使用环境变量或默认值
+  const resolvedBaseUrl = apiBaseUrl ?? 
+    (import.meta.env.PROD ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'));
+
   const [capabilities, setCapabilities] = useState<AgentCapability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -20,7 +24,7 @@ export function useAgentCapabilities(
     setError(null);
     
     try {
-      const response = await fetch(`${apiBaseUrl}/api/agent/capabilities`);
+      const response = await fetch(`${resolvedBaseUrl}/api/agent/capabilities`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -34,7 +38,7 @@ export function useAgentCapabilities(
     } finally {
       setIsLoading(false);
     }
-  }, [apiBaseUrl]);
+  }, [resolvedBaseUrl]);
 
   useEffect(() => {
     fetchCapabilities();

@@ -18,7 +18,9 @@ if (!process.env.DEEPSEEK_API_KEY) {
   console.error('❌ Error: DEEPSEEK_API_KEY is not set in .env file');
   console.error('Please create a .env file in the backend directory with:');
   console.error('DEEPSEEK_API_KEY=your_deepseek_api_key_here');
-  process.exit(1);
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
 }
 
 // 兼容OpenAI SDK
@@ -34,9 +36,10 @@ import agentRoutes from './api/agent.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 中间件
+// 中间件 - Vercel 生产环境允许所有来源，本地开发限定
+const isVercel = !!process.env.VERCEL;
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: isVercel ? true : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
@@ -73,12 +76,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 启动服务器
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server is running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📍 Agent API: http://localhost:${PORT}/api/agent`);
-  console.log('\n✅ Ready to accept requests!\n');
-});
+// Vercel 环境不启动 HTTP 服务器（由 Serverless Function 处理）
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Server is running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`📍 Agent API: http://localhost:${PORT}/api/agent`);
+    console.log('\n✅ Ready to accept requests!\n');
+  });
+}
 
+// 导出 Express app 供 Vercel Serverless Function 使用
 export default app;
